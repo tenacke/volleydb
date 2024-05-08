@@ -25,7 +25,7 @@ class PlayerForm(forms.Form):
     password = forms.CharField(label='Password', widget=forms.PasswordInput, required=False)
     name = forms.CharField(label='Name', required=False)
     surname = forms.CharField(label='Surname', required=False)
-    dob = forms.DateField(label='Date of Birth', required=False)
+    dob = forms.DateField(label='Date of Birth (DD.MM.YYYY)', required=False, input_formats=['%d.%m.%Y'])
     height = forms.DecimalField(label='Height', required=False)
     weight = forms.DecimalField(label='Weight', required=False)
     teams = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, required=True)
