@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Stadium Name</title>
+</head>
+<body>
+    {% if error_message %}
+    <p>{{ error_message }}</p>
+    {% endif %}
+        {% if average_ratings > -1 and count_ratings > -1 %}
+        <h2>The Average Of Your Ratings Is : {{average_ratings}}</h2>
+        <br>
+        <h2>The Total Count of Your Rated Matches Is : {{count_ratings}}</h2>
+        {% else %}
+        <p>No ratings found.</p>
+        {% endif %}
+
+
+</body>
+</html>

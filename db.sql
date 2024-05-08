@@ -100,9 +100,9 @@ CREATE TABLE MatchSession (
     rating FLOAT,
     team_id INT NOT NULL,
     stadium_id INT NOT NULL,
-    jury_username CHAR(20) NOT NULL,
+    assigned_jury_username CHAR(20) NOT NULL,
     PRIMARY KEY (session_ID),
-    UNIQUE (session_ID, jury_username),
+    UNIQUE (session_ID, assigned_jury_username),
     UNIQUE (team_id, match_date, time_slot, stadium_id),
     FOREIGN KEY (stadium_id) REFERENCES Stadium(stadium_id)
         ON DELETE CASCADE
@@ -110,7 +110,7 @@ CREATE TABLE MatchSession (
     FOREIGN KEY (team_id) REFERENCES Team(team_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (jury_username) REFERENCES Jury(username)
+    FOREIGN KEY (assigned_jury_username) REFERENCES Jury(username)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     CHECK (time_slot BETWEEN 1 AND 3)
@@ -299,15 +299,15 @@ INSERT INTO PlaysForTeam (username, team_ID) VALUES ('user_3000', '1');
 INSERT INTO PlaysForTeam (username, team_ID) VALUES ('user_3000', '4');
 INSERT INTO PlaysForTeam (username, team_ID) VALUES ('user_8323', '3');
 INSERT INTO PlaysForTeam (username, team_ID) VALUES ('user_8323', '2');
-INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, jury_username, rating) VALUES ('0', '0', '0', '1', STR_TO_DATE('10.03.2024', '%d.%m.%Y'), 'o_ozcelik', '4.5');
-INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, jury_username, rating) VALUES ('1', '1', '1', '1', STR_TO_DATE('03.04.2024', '%d.%m.%Y'), 'o_ozcelik', '4.9');
-INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, jury_username, rating) VALUES ('2', '0', '1', '3', STR_TO_DATE('03.04.2024', '%d.%m.%Y'), 'o_ozcelik', '4.4');
-INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, jury_username, rating) VALUES ('3', '2', '2', '2', STR_TO_DATE('03.04.2024', '%d.%m.%Y'), 'm_sevinc', '4.9');
-INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, jury_username, rating) VALUES ('4', '3', '2', '2', STR_TO_DATE('03.04.2023', '%d.%m.%Y'), 'e_sener', '4.5');
-INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, jury_username, rating) VALUES ('5', '3', '1', '1', STR_TO_DATE('27.05.2023', '%d.%m.%Y'), 's_engin', '4.4');
-INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, jury_username, rating) VALUES ('6', '0', '1', '1', STR_TO_DATE('01.09.2022', '%d.%m.%Y'), 'm_sevinc', '4.6');
-INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, jury_username, rating) VALUES ('7', '0', '2', '3', STR_TO_DATE('02.05.2023', '%d.%m.%Y'), 'o_ozcelik', '4.7');
-INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, jury_username, rating) VALUES ('8', '1', '0', '1', STR_TO_DATE('10.03.2024', '%d.%m.%Y'), 'o_ozcelik', '4.5');
+INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, assigned_jury_username, rating) VALUES ('0', '0', '0', '1', STR_TO_DATE('10.03.2024', '%d.%m.%Y'), 'o_ozcelik', '4.5');
+INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, assigned_jury_username, rating) VALUES ('1', '1', '1', '1', STR_TO_DATE('03.04.2024', '%d.%m.%Y'), 'o_ozcelik', '4.9');
+INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, assigned_jury_username, rating) VALUES ('2', '0', '1', '3', STR_TO_DATE('03.04.2024', '%d.%m.%Y'), 'o_ozcelik', '4.4');
+INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, assigned_jury_username, rating) VALUES ('3', '2', '2', '2', STR_TO_DATE('03.04.2024', '%d.%m.%Y'), 'm_sevinc', '4.9');
+INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, assigned_jury_username, rating) VALUES ('4', '3', '2', '2', STR_TO_DATE('03.04.2023', '%d.%m.%Y'), 'e_sener', '4.5');
+INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, assigned_jury_username, rating) VALUES ('5', '3', '1', '1', STR_TO_DATE('27.05.2023', '%d.%m.%Y'), 's_engin', '4.4');
+INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, assigned_jury_username, rating) VALUES ('6', '0', '1', '1', STR_TO_DATE('01.09.2022', '%d.%m.%Y'), 'm_sevinc', '4.6');
+INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, assigned_jury_username, rating) VALUES ('7', '0', '2', '3', STR_TO_DATE('02.05.2023', '%d.%m.%Y'), 'o_ozcelik', '4.7');
+INSERT INTO MatchSession (session_ID, team_ID, stadium_ID, time_slot, match_date, assigned_jury_username, rating) VALUES ('8', '1', '0', '1', STR_TO_DATE('10.03.2024', '%d.%m.%Y'), 'o_ozcelik', '4.5');
 INSERT INTO PlaysInSession (session_ID, username, position_id) VALUES ('0', 'g_orge', 0);
 INSERT INTO PlaysInSession (session_ID, username, position_id) VALUES ('0', 'c_ozbay', 1);
 INSERT INTO PlaysInSession (session_ID, username, position_id) VALUES ('0', 'm_vargas', 2);

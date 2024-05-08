@@ -22,7 +22,7 @@ def index(request):
 def home(request):
     if 'username' not in request.session:
         return redirect("index")
-    return render(request, 'home.html', {'type': request.session['type']})
+    return render(request, 'home.html', {'type': request.session['type'], 'username': request.session['username']})
 
 def add_coach(request):
     manager = MySQLManager()
@@ -98,7 +98,6 @@ def add_player(request):
                 manager.add_player(username, password, name, surname, dob, height, weight, selected_teams, selected_positions)
             except Exception as e:
                 error_message = "Error: {}".format(e)
-                print(error_message)
                 return render(request, 'add_player.html', {'form': form, 'team_choices': team_choices, 'position_choices': position_choices, 'error_message': error_message})
 
             return redirect("home")
@@ -125,7 +124,6 @@ def change_stadium_name(request):
                 manager.change_stadium_name(selected_stadium, name)
             except Exception as e:
                 error_message = "Error: {}".format(e)
-                print(error_message)
                 return render(request, 'change_stadium_name.html', {'form': form, 'stadium_choices': stadium_choices, 'error_message': error_message})
 
             return redirect("home")
@@ -133,3 +131,15 @@ def change_stadium_name(request):
         form = StadiumForm()
 
     return render(request, 'change_stadium_name.html', {'form': form, 'stadium_choices': stadium_choices})
+
+def ratings(request):
+    manager = MySQLManager()
+    average_ratings = -1
+    count_ratings = -1
+    try:
+        average_ratings = manager.average_ratings(request.session['username'])
+        count_ratings = manager.count_ratings(request.session['username'])
+    except Exception as e:
+        error_message = "Error: {}".format(e)
+        return render(request, 'jury_ratings.html', {'average_ratings':average_ratings, 'count_ratings':count_ratings })
+    return render(request, 'jury_ratings.html', {'average_ratings':average_ratings, 'count_ratings':count_ratings })

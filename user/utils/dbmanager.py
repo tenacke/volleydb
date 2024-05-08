@@ -7,6 +7,8 @@ class MySQLManager:
             host="localhost",
             port=3306,
             database="volleydb",
+            user = "root", 
+            password = "Turkiyegunesli2001"
 
         )
         self.cursor = self.connection.cursor()
@@ -75,13 +77,11 @@ class MySQLManager:
             self.connection.commit()
         except Exception as e:
             self.connection.rollback()
-            print("Error occurred during coach insertion:", e)
             raise
         finally:
             self.cursor.reset()
     
     def add_jury(self, username, password, name, surname, nationality):
-        print("Adding jury:")
         try:
             self.cursor.execute("INSERT INTO user(username, password, name, surname) VALUES (%s, %s, %s, %s)",
                                 (username, password, name, surname))
@@ -90,7 +90,6 @@ class MySQLManager:
             self.connection.commit()
         except Exception as e:
             self.connection.rollback()
-            print("Error occurred during jury insertion:", e)
             raise
         finally:
             self.cursor.reset()
@@ -112,7 +111,6 @@ class MySQLManager:
             self.connection.commit()
         except Exception as e:
             self.connection.rollback()
-            print("Error occurred during player insertion:", e)
             raise
         finally:
             self.cursor.reset()
@@ -124,19 +122,27 @@ class MySQLManager:
         return stadiums
     
     def change_stadium_name(self, id, name):
-        print(name)
         try:
             self.cursor.execute("UPDATE stadium SET stadium_name = %s WHERE stadium_id = %s;", (name, id))
             self.connection.commit()
         except Exception as e:
             self.connection.rollback()
-            print("Error occurred stadium name change:", e)
             raise
         finally:
             self.cursor.reset()
+    
+    def average_ratings(self, username):
+        self.cursor.execute('SELECT AVG(rating) FROM matchsession WHERE assigned_jury_username = %s;', (username,))
+        average = self.cursor.fetchall()
+        self.cursor.reset()
+        return average[0][0]
+    def count_ratings(self, username):
+        self.cursor.execute('SELECT COUNT(rating) FROM matchsession WHERE assigned_jury_username = %s;', (username,))
+        count = self.cursor.fetchall()
+        self.cursor.reset()
+        return count[0][0]
 
     
 if __name__ == "__main__":
     manager = MySQLManager()
-    print(manager.login("emre", "emre"))
 
