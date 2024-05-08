@@ -28,20 +28,41 @@ class PlayerForm(forms.Form):
     dob = forms.DateField(label='Date of Birth (DD.MM.YYYY)', required=False, input_formats=['%d.%m.%Y'])
     height = forms.DecimalField(label='Height', required=False)
     weight = forms.DecimalField(label='Weight', required=False)
-    teams = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, required=True)
+    teams = forms.MultipleChoiceField(label = "Teams (team_id, team_name)", widget=forms.CheckboxSelectMultiple, required=True)
     positions = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, required=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         manager = MySQLManager()
         teams = manager.get_teams()
-        self.fields['teams'].choices = [(team[0], team[1]) for team in teams]
+        self.fields['teams'].choices = [(team[0], f"({team[0]}, {team[1]})") for team in teams]
         positions = manager.get_positions()
         self.fields['positions'].choices = [(position[0], position[1]) for position in positions]
+
     def clean(self):
         cleaned_data = super(PlayerForm, self).clean()
         teams = cleaned_data.get('teams')
         positions = cleaned_data.get('positions')
         if not teams or not positions:
             raise forms.ValidationError("Please select at least one team and one position.")
+        return cleaned_data
+
+
+class StadiumForm(forms.Form):
+    stadiums = forms.ChoiceField(widget=forms.RadioSelect)
+    name = forms.CharField(label='New Stadium Name', required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        manager = MySQLManager()
+        stadiums = manager.get_stadiums()
+        self.fields['stadiums'].choices = [(stadium[0], stadium[1]) for stadium in stadiums]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        stadiums = cleaned_data.get('stadiums')
+        
+        if not stadiums:
+            raise forms.ValidationError("Please select a stadium.")
+        
         return cleaned_data

@@ -6,7 +6,7 @@ class MySQLManager:
         self.connection = connect(
             host="localhost",
             port=3306,
-            database="volleydb1",
+            database="volleydb",
 
         )
         self.cursor = self.connection.cursor()
@@ -55,7 +55,7 @@ class MySQLManager:
         return result is not None
 
     def get_teams(self):
-        self.cursor.execute("SELECT * FROM team")
+        self.cursor.execute("SELECT team_id, team_name FROM team")
         teams = self.cursor.fetchall()
         self.cursor.reset()
         return teams
@@ -116,6 +116,25 @@ class MySQLManager:
             raise
         finally:
             self.cursor.reset()
+    
+    def get_stadiums(self):
+        self.cursor.execute("SELECT * FROM stadium")
+        stadiums = self.cursor.fetchall()
+        self.cursor.reset()
+        return stadiums
+    
+    def change_stadium_name(self, id, name):
+        print(name)
+        try:
+            self.cursor.execute("UPDATE stadium SET stadium_name = %s WHERE stadium_id = %s;", (name, id))
+            self.connection.commit()
+        except Exception as e:
+            self.connection.rollback()
+            print("Error occurred stadium name change:", e)
+            raise
+        finally:
+            self.cursor.reset()
+
     
 if __name__ == "__main__":
     manager = MySQLManager()

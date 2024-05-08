@@ -106,3 +106,30 @@ def add_player(request):
         form = PlayerForm()
 
     return render(request, 'add_player.html', {'form': form, 'team_choices': team_choices, 'position_choices': position_choices})
+
+def change_stadium_name(request):
+    manager = MySQLManager()
+    stadiums = manager.get_stadiums()
+    stadium_choices = [(stadium[0], stadium[1]) for stadium in stadiums]
+    
+    if request.method == 'POST':
+        form = StadiumForm(request.POST)
+        if form.is_valid():
+            selected_stadium = form.cleaned_data['stadiums']
+            name = form.cleaned_data['name']
+            
+            if not selected_stadium:
+                error_message = 'Please select a stadium.'
+                return render(request, 'change_stadium_name.html', {'form': form, 'stadium_choices': stadium_choices})
+            try:
+                manager.change_stadium_name(selected_stadium, name)
+            except Exception as e:
+                error_message = "Error: {}".format(e)
+                print(error_message)
+                return render(request, 'change_stadium_name.html', {'form': form, 'stadium_choices': stadium_choices, 'error_message': error_message})
+
+            return redirect("home")
+    else:
+        form = StadiumForm()
+
+    return render(request, 'change_stadium_name.html', {'form': form, 'stadium_choices': stadium_choices})
