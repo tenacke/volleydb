@@ -6,7 +6,7 @@ from django.contrib import messages
 
 
 
-from .utils.forms import UserForm, PlayerForm
+from .utils.forms import *
 from .utils.usercontroller import UserController
 
 # Create your views here.
@@ -32,6 +32,25 @@ def home(request):
     if 'username' not in request.session:
         return redirect("index")
     return render(request, 'home.html', {'type': request.session['type']})
+
+def add_coach(request):
+    manager = MySQLManager()
+    if request.method == 'POST':
+        form = CoachForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            name = form.cleaned_data['name']
+            surname = form.cleaned_data['surname']
+            nationality = form.cleaned_data['nationality']
+
+        manager.add_coach(username, password, name, surname, nationality)
+        return render(request, 'home.html',  {'type': request.session['type']})
+    else:
+        form = CoachForm()
+
+    return render(request, 'add_coach.html', {'form': form})
+    
 
 def add_player(request):
     manager = MySQLManager()

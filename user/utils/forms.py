@@ -6,6 +6,13 @@ class UserForm(forms.Form):
     username = forms.CharField(label='Username', max_length=100)
     password = forms.CharField(label='Password', max_length=100)
 
+class CoachForm(forms.Form):
+    username = forms.CharField(label='Username', max_length=100, required = True)
+    password = forms.CharField(label='Password', max_length=100, required = False)
+    name = forms.CharField(label='Name', required=False)
+    surname = forms.CharField(label='Surname', required=False)
+    nationality = forms.CharField(label='Nationality', required=True)
+
 class PlayerForm(forms.Form):
     username = forms.CharField(label='Username', required=True)
     password = forms.CharField(label='Password', widget=forms.PasswordInput, required=False)
