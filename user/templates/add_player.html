@@ -6,6 +6,9 @@
     <title>Add a Player</title>
 </head>
 <body>
+    {% if error_message %}
+    <p>{{ error_message }}</p>
+    {% endif %}
 
     <h1>Add a Player</h1>
 
