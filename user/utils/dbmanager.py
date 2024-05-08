@@ -7,8 +7,7 @@ class MySQLManager:
             host="localhost",
             port=3306,
             database="volleydb1",
-            user = "root", 
-            password = "Turkiyegunesli2001"
+
         )
         self.cursor = self.connection.cursor()
 
@@ -76,10 +75,26 @@ class MySQLManager:
             self.connection.commit()
         except Exception as e:
             self.connection.rollback()
-            print("Error occurred during player insertion:", e)
+            print("Error occurred during coach insertion:", e)
             raise
         finally:
             self.cursor.reset()
+    
+    def add_jury(self, username, password, name, surname, nationality):
+        print("Adding jury:")
+        try:
+            self.cursor.execute("INSERT INTO user(username, password, name, surname) VALUES (%s, %s, %s, %s)",
+                                (username, password, name, surname))
+            self.cursor.execute("INSERT INTO jury(username, nationality) VALUES (%s, %s)",
+                                (username, nationality))
+            self.connection.commit()
+        except Exception as e:
+            self.connection.rollback()
+            print("Error occurred during jury insertion:", e)
+            raise
+        finally:
+            self.cursor.reset()
+
 
     def add_player(self, username, password, name, surname, dob, height, weight, selected_teams, selected_positions):
         try:

@@ -50,7 +50,25 @@ def add_coach(request):
         form = CoachForm()
 
     return render(request, 'add_coach.html', {'form': form})
-    
+
+def add_jury(request):
+    manager = MySQLManager()
+    if request.method == 'POST':
+        form = JuryForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            name = form.cleaned_data['name']
+            surname = form.cleaned_data['surname']
+            nationality = form.cleaned_data['nationality']
+
+            manager.add_jury(username, password, name, surname, nationality)
+            return render(request, 'home.html',  {'type': request.session['type']})
+    else:
+        form = JuryForm()
+
+    return render(request, 'add_jury.html', {'form': form})
+      
 
 def add_player(request):
     manager = MySQLManager()
