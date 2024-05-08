@@ -7,8 +7,6 @@ class MySQLManager:
             host="localhost",
             port=3306,
             database="volleydb",
-            user = "root", 
-            password = "Turkiyegunesli2001"
 
         )
         self.cursor = self.connection.cursor()
