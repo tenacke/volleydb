@@ -9,5 +9,11 @@
 
     <h1>Hello {{ type }}</h1>
     
+    {% if type == "manager" %}
+        <ul>
+            <li><a href="http://127.0.0.1:8000/add_player">Add Player</a></li>
+        </ul>
+    {% endif %}
+    
 </body>
 </html>
