@@ -16,6 +16,8 @@ def index(request):
                 request.session["username"] = controller.username
                 request.session["type"] = controller.type
                 return redirect("home")
+            else:
+                return render(request, "index.html", {"form": form, "error_message":"Wrong username and/or password. Please try again."})
     else:
         form = UserForm()
 
