@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Match Session</title>
+</head>
+<body>
+    {% if error_message %}
+    <p>{{ error_message }}</p>
+    {% endif %}
+
+    <h1>Delete Match Session</h1>
+
+    <form action="/delete_match_session" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

@@ -24,6 +24,14 @@
         <li><a href="http://127.0.0.1:8000/jury_ratings">Your Rating Details</a></li>
     </ul>
     {% endif %}
-    
+
+    {% if type == "coach" %}
+        <ul>
+            <li><a href="/add_match_session">Add Match Session</a></li>
+            <li><a href="/delete_match_session">Delete Match Session</a></li>
+            <li><a href="/add_squad">Add Squad</a></li>
+            <li><a href="/list_stadiums">List Stadiums</a></li>
+        </ul>
+    {% endif %} 
 </body>
 </html>

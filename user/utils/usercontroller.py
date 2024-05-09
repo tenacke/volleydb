@@ -1,7 +1,6 @@
 from .dbmanager import MySQLManager
 
 class UserController:
-    _controller = None
     def __init__(self):
         self.manager = MySQLManager()
 
@@ -20,13 +19,7 @@ class UserController:
             self.password = user[1]
             self.name = user[2]
             self.surname = user[3]
-            return True
 
-    def getType(self):
-        if getattr(self, 'username', None) is None:
-            return None
-        
-        if getattr(self, 'type', None) is None:
             if self.manager.isCoach(self.username):
                 self.type = 'coach'
             elif self.manager.isPlayer(self.username):
@@ -36,4 +29,4 @@ class UserController:
             else:
                 self.type = 'manager'
 
-        return self.type
+            return True
