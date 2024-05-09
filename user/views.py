@@ -317,6 +317,6 @@ def add_squad(request):
 
             return redirect("home")
     else:
-        form = SessionSquadForm()
+        form = SessionSquadForm(coach_username=request.session["username"])
 
     return render(request, "add_squad.html", {"form": form})

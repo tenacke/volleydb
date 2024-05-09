@@ -116,12 +116,12 @@ class MySQLManager:
             )
             for team in selected_teams:
                 self.cursor.execute(
-                    "INSERT INTO playsforteam(username, team_id) VALUES (%s, %s)",
+                    "INSERT INTO playerteams(username, team) VALUES (%s, %s)",
                     (username, team),
                 )
             for position in selected_positions:
                 self.cursor.execute(
-                    "INSERT INTO playsinposition(username, position_id) VALUES (%s, %s)",
+                    "INSERT INTO playerpositions(username, position) VALUES (%s, %s)",
                     (username, position),
                 )
 
@@ -189,7 +189,7 @@ class MySQLManager:
 
     def get_sessions_by_coach_username(self, coach_username):
         self.cursor.execute(
-            "SELECT session_id FROM matchsession where session_id not in (select session_id from playsinsession) inner join team on matchsession.team_id = team.team_id WHERE team.coach_username = %s;",
+            "SELECT session_id FROM matchsession where session_id not in (select session_id from sessionsquad) inner join team on matchsession.team_id = team.team_id WHERE team.coach_username = %s;",
             (coach_username,),
         )
 
