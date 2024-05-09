@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Info</title>
+</head>
+<body>
+    {% if error_message %}
+    <p>{{ error_message }}</p>
+    {% endif %}
+
+    {% if not players %}
+    <p>You have not played in any sessions yet.</p>
+{% else %}
+    <h3>You have played in at least one session with:</h3>
+    <ul>
+        {% for player in players %}
+        <li>
+            {% for element in player %}
+                {{ element }} &nbsp;
+            {% endfor %}
+        </li>
+        {% endfor %}
+    </ul>
+    <h3>The (average) height of the player(s) you have played the most with is: {{height}}</h3>
+{% endif %}
+</body>
+</html>

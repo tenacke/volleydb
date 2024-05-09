@@ -8,6 +8,8 @@ class MySQLManager:
             host="localhost",
             port=3306,
             database="volleydb",
+            user ="root", 
+            password = "Turkiyegunesli2001"
         )
         self.cursor = self.connection.cursor()
 
@@ -189,7 +191,8 @@ class MySQLManager:
 
     def get_sessions_by_coach_username(self, coach_username):
         self.cursor.execute(
-            "SELECT session_id FROM matchsession where session_id not in (select session_id from sessionsquad) inner join team on matchsession.team_id = team.team_id WHERE team.coach_username = %s;",
+            """SELECT session_id FROM matchsession where session_id not in (select session_id from sessionsquad) 
+            inner join team on matchsession.team_id = team.team_id WHERE team.coach_username = %s;""",
             (coach_username,),
         )
 
@@ -198,7 +201,8 @@ class MySQLManager:
     
     def get_rating_matches(self, username):
         current_date = datetime.now().date()
-        sql_query = 'SELECT * FROM matchsession WHERE rating IS NULL AND assigned_jury_username = %s AND date < str_to_date(%s, "%Y-%m-%d")'
+        sql_query = """SELECT * FROM matchsession 
+        WHERE rating IS NULL AND assigned_jury_username = %s AND date < str_to_date(%s, "%Y-%m-%d")"""
         self.cursor.execute(sql_query, (username, current_date))
         matches = self.cursor.fetchall()
         self.cursor.reset()
@@ -216,6 +220,43 @@ class MySQLManager:
             raise
         finally:
             self.cursor.reset()
+    
+    def players(self, username):
+        self.cursor.execute(
+            """SELECT DISTINCT name, surname 
+            FROM sessionsquads AS V1 
+            INNER JOIN sessionsquads AS V2 ON V1.session_ID = V2.session_ID 
+            INNER JOIN user ON V2.played_player_username = user.username 
+            WHERE V1.played_player_username = %s AND V2.played_player_username != %s;""",
+            (username, username),
+        )
+        players = self.cursor.fetchall()
+        self.cursor.reset()
+        return players
+    
+    def players_height(self, username):
+        self.cursor.execute(
+            """SELECT AVG(height) FROM
+            (SELECT MAX(count) as max_count
+            FROM (
+            SELECT V2.played_player_username, COUNT(V2.played_player_username) AS count
+            FROM sessionsquads AS V1 
+            INNER JOIN sessionsquads AS V2 ON V1.session_ID = V2.session_ID 
+            INNER JOIN user ON V2.played_player_username = user.username
+            WHERE V1.played_player_username = %s AND V2.played_player_username != %s
+            GROUP BY V2.played_player_username) AS all_counts) AS max_count
+            INNER JOIN (SELECT V2.played_player_username, COUNT(V2.played_player_username) AS count
+            FROM sessionsquads AS V1 
+            INNER JOIN sessionsquads AS V2 ON V1.session_ID = V2.session_ID 
+            INNER JOIN user ON V2.played_player_username = user.username
+            WHERE V1.played_player_username = %s AND V2.played_player_username != %s
+            GROUP BY V2.played_player_username) AS all_counts
+            ON max_count = count
+            INNER JOIN player ON played_player_username = username;"""
+        , (username, username, username, username),)
+        height = self.cursor.fetchall()
+        self.cursor.reset()
+        return height[0][0]
 
 
 if __name__ == "__main__":

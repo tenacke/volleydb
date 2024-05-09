@@ -371,3 +371,24 @@ def rate_match(request):
         "rate_match.html",
         {"form": form, "match_choices": match_choices},
     )
+    
+def player(request):
+    manager = MySQLManager()
+    played_with = []
+    try:
+        played_with = manager.players(request.session["username"])
+        height = manager.players_height(request.session["username"])
+    except Exception as e:
+        error_message = "Error: {}".format(e)
+        return render(
+            request,
+            "player.html",
+            {"players": played_with, "height": height, "error_message": error_message},
+        )
+    return render(
+        request,
+        "player.html",
+        {"players": played_with, "height": height},
+    )
+
+
