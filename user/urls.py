@@ -15,4 +15,5 @@ urlpatterns = [
     ),
     path("list_stadiums", views.list_stadiums, name="list_stadiums"),
     path("add_squad", views.add_squad, name="add_squad"),
+    path("rate_match", views.rate_match, name= "rate_match")
 ]

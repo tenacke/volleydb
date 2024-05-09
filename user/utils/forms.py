@@ -159,3 +159,25 @@ class AddSquadForm(forms.Form):
             raise forms.ValidationError("Please select 6 players.")
 
         return cleaned_data
+
+class RateMatchForm(forms.Form):
+    matches = forms.ChoiceField(label = "matches (session_ID, time_slot, date)", widget=forms.RadioSelect)
+    rating = forms.DecimalField(label="New Rating", required=True)
+
+    def __init__(self, *args, **kwargs):
+        username = kwargs.pop('username')
+        super().__init__(*args, **kwargs)
+        manager = MySQLManager()
+        matches = manager.get_rating_matches(username)
+        self.fields["matches"].choices = [
+            (match[0], f"({match[0]}, {match[1]}, {match[2]})") for match in matches
+        ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        matches = cleaned_data.get("matches")
+
+        if not matches:
+            raise forms.ValidationError("Please select a match.")
+
+        return cleaned_data

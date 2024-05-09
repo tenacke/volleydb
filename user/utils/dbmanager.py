@@ -1,4 +1,5 @@
 from mysql.connector import connect
+from datetime import datetime
 
 
 class MySQLManager:
@@ -174,7 +175,6 @@ class MySQLManager:
             "SELECT user.username, user.name, user.surname FROM jury inner join user on jury.username = user.username"
         )
         juries = self.cursor.fetchall()
-        print(juries)
         self.cursor.reset()
         return juries
 
@@ -195,6 +195,27 @@ class MySQLManager:
 
     def get_players_by_session_id(self, session_id):
         pass
+    
+    def get_rating_matches(self, username):
+        current_date = datetime.now().date()
+        sql_query = 'SELECT * FROM matchsession WHERE rating IS NULL AND assigned_jury_username = %s AND date < str_to_date(%s, "%Y-%m-%d")'
+        self.cursor.execute(sql_query, (username, current_date))
+        matches = self.cursor.fetchall()
+        self.cursor.reset()
+        return matches
+
+    def rate_match(self, id, rating):
+        try:
+            self.cursor.execute(
+                "UPDATE matchsession SET rating = %s WHERE session_id = %s;",
+                (rating, id),
+            )
+            self.connection.commit()
+        except Exception as e:
+            self.connection.rollback()
+            raise
+        finally:
+            self.cursor.reset()
 
 
 if __name__ == "__main__":

@@ -320,3 +320,54 @@ def add_squad(request):
         form = SessionSquadForm(coach_username=request.session["username"])
 
     return render(request, "add_squad.html", {"form": form})
+
+
+def rate_match(request):
+    manager = MySQLManager()
+    matches = manager.get_rating_matches(request.session["username"])
+    match_choices = [(match[0], match[1]) for match in matches]
+    if len(matches) == 0:
+        error_message = "No matches for you to rate"
+        return render(
+        request,
+        "home.html",
+        {"type": request.session["type"], "username": request.session["username"], "error_message": error_message})
+
+
+
+    if request.method == "POST":
+        form = RateMatchForm(request.POST, username = request.session["username"])
+        if form.is_valid():
+            selected_match = form.cleaned_data["matches"]
+            rating = form.cleaned_data["rating"]
+
+            if not selected_match:
+                error_message = "Please select a match you want to rate."
+                return render(
+                    request,
+                    "rate_match.html",
+                    {"form": form, "match_choices": match_choices},
+                )
+            try:
+                manager.rate_match(selected_match, rating)
+            except Exception as e:
+                error_message = "Error: {}".format(e)
+                return render(
+                    request,
+                    "rate_match.html",
+                    {
+                        "form": form,
+                        "match_choices": match_choices,
+                        "error_message": error_message,
+                    },
+                )
+
+            return redirect("home")
+    else:
+        form = RateMatchForm(username = request.session["username"])
+
+    return render(
+        request,
+        "rate_match.html",
+        {"form": form, "match_choices": match_choices},
+    )
