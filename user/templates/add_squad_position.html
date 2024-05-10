@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Squad Position</title>
+</head>
+<body>
+    {% if error_message %}
+    <p>{{ error_message }}</p>
+    {% endif %}
+    <h1>Add Squad Player</h1>
+    <form action="/add_squad_position" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Submit">
+    </form>
+    <br><br>
+    <button style = "background-color:aquamarine"><a href="/home">Home Page</a></button>
+    <br><br>
+    <button style = "background-color:violet"><a href="/">Log Out</a></button>
+</body>
+</html>

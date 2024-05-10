@@ -362,3 +362,37 @@ INSERT INTO SessionSquads (session_ID, played_player_username, position_id) VALU
 INSERT INTO SessionSquads (session_ID, played_player_username, position_id) VALUES ('7', 'a_kalac', 4);
 INSERT INTO SessionSquads (session_ID, played_player_username, position_id) VALUES ('7', 'e_karakurt', 2);
 INSERT INTO SessionSquads (session_ID, played_player_username, position_id) VALUES ('7', 'a_aykac', 0);
+
+DELIMITER $$
+CREATE TRIGGER check_time_slot BEFORE INSERT ON MatchSession
+FOR EACH ROW
+BEGIN
+    IF NEW.time_slot = 1 THEN
+        IF EXISTS (SELECT stadium_id, `date`, time_slot FROM MatchSession WHERE stadium_id = NEW.stadium_id AND `date` = NEW.`date` AND time_slot < 3) THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Time slot is already taken for this stadium and date';
+        END IF;
+    END IF;
+    IF NEW.time_slot = 2 THEN
+        IF EXISTS (SELECT stadium_id, `date`, time_slot FROM MatchSession WHERE stadium_id = NEW.stadium_id AND `date` = NEW.`date`) THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Time slot is already taken for this stadium and date';
+        END IF;
+    END IF;
+    IF NEW.time_slot = 3 THEN
+        IF EXISTS (SELECT stadium_id, `date`, time_slot FROM MatchSession WHERE stadium_id = NEW.stadium_id AND `date` = NEW.`date` AND time_slot > 1) THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Time slot is already taken for this stadium and date';
+        END IF;
+    END IF;
+END; $$
+
+CREATE TRIGGER check_position BEFORE INSERT ON SessionSquads
+FOR EACH ROW
+BEGIN
+    IF NOT EXISTS (SELECT * FROM PlayerPositions WHERE username = NEW.played_player_username AND position = NEW.position_id) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Player' + NEW.played_player_username + 'does not play in this position';
+    END IF;
+END; $$
+DELIMITER ;

@@ -10,6 +10,10 @@ class MySQLManager:
             database="volleydb",
         )
         self.cursor = self.connection.cursor()
+        self.session_count = 0
+        self.cursor.execute("SELECT MAX(session_id) FROM matchsession")
+        self.session_count = self.cursor.fetchone()[0] + 1
+        self.cursor.reset()
 
     def __new__(cls):
         if not hasattr(cls, "instance"):
@@ -178,24 +182,89 @@ class MySQLManager:
         self.cursor.reset()
         return juries
 
-    def add_match_session(self, stadium, date, time_slot, jury):
-        pass
+    def add_match_session(self, stadium, date, time_slot, jury, team_id):
+        try:
+            self.cursor.execute(
+                "INSERT INTO matchsession(session_id, stadium_id, date, time_slot, assigned_jury_username, team_id) VALUES (%s, %s, %s, %s, %s, %s)",
+                (self.session_count, stadium, date, time_slot, jury, team_id),
+            )
+            self.connection.commit()
+            self.session_count += 1
+        except Exception as e:
+            self.connection.rollback()
+            raise
+        finally:
+            self.cursor.reset()
 
     def delete_match_session(self, session_id):
-        pass
+        try:
+            self.cursor.execute(
+                "DELETE FROM matchsession WHERE session_id = %s;", (session_id,)
+            )
+            self.connection.commit()
+        except Exception as e:
+            self.connection.rollback()
+            raise
+        finally:
+            self.cursor.reset()
+        return True
 
-    def add_squad(self, team_id, player_ids):
-        pass
+    def add_squad(self, session_id, players):
+        for player, position in players:
+            try:
+                self.cursor.execute(
+                    "INSERT INTO sessionsquads(session_id, played_player_username, position_id) VALUES (%s, %s, %s)",
+                    (session_id, player, position),
+                )
+                self.connection.commit()
+            except Exception as e:
+                self.connection.rollback()
+                raise
+            finally:
+                self.cursor.reset()
 
-    def get_sessions_by_coach_username(self, coach_username):
+    def delete_squad(self, session_id):
         self.cursor.execute(
-            """SELECT session_id FROM matchsession where session_id not in (select session_id from sessionsquad) 
-            inner join team on matchsession.team_id = team.team_id WHERE team.coach_username = %s;""",
+            "DELETE FROM sessionsquads WHERE session_id = %s;", (session_id,)
+        )
+        self.connection.commit()
+        self.cursor.reset()
+
+    def get_team_by_coach_username(self, coach_username, date):
+        self.cursor.execute(
+            """SELECT team_id FROM team WHERE coach_username = %s and contract_start <= STR_TO_DATE(%s, "%Y-%m-%d") and contract_finish >= STR_TO_DATE(%s, "%Y-%m-%d");""",
+            (coach_username, date, date),
+        )
+        team = self.cursor.fetchone()
+        self.cursor.reset()
+        return team
+
+    def get_sessions_by_coach_username(self, coach_username, filter):
+        query = (
+            """SELECT M.session_id, M.team_id FROM matchsession M inner join team on M.team_id = team.team_id 
+            WHERE session_id not in (select session_id from sessionsquads) and team.coach_username = %s;"""
+            if filter
+            else """SELECT M.session_id, M.team_id FROM matchsession M inner join team on M.team_id = team.team_id 
+            and team.coach_username = %s;"""
+        )
+        self.cursor.execute(
+            query,
             (coach_username,),
         )
+        sessions = self.cursor.fetchall()
+        self.cursor.reset()
+        return sessions
 
     def get_players_by_session_id(self, session_id):
-        pass
+        query = """SELECT DISTINCT user.username, user.name, user.surname
+        FROM user inner join player on user.username = player.username
+        inner join (select team from playerteams 
+        inner join (select team_id from matchsession where session_id = %s) as session 
+        on playerteams.team = session.team_id) as team"""
+        self.cursor.execute(query, (session_id,))
+        players = self.cursor.fetchall()
+        self.cursor.reset()
+        return players
 
     def get_rating_matches(self, username):
         current_date = datetime.now().date()

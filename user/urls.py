@@ -15,6 +15,8 @@ urlpatterns = [
     ),
     path("list_stadiums", views.list_stadiums, name="list_stadiums"),
     path("add_squad", views.add_squad, name="add_squad"),
-    path("rate_match", views.rate_match, name= "rate_match"),
-    path("player", views.player, name = "player")
+    path("rate_match", views.rate_match, name="rate_match"),
+    path("player", views.player, name="player"),
+    path("add_squad_player", views.add_squad_player, name="add_squad_player"),
+    path("add_squad_position", views.add_squad_position, name="add_squad_position"),
 ]

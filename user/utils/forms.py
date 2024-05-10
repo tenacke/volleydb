@@ -102,7 +102,11 @@ class SessionForm(forms.Form):
         self.fields["stadium"].choices = [
             (stadium[0], stadium[1]) for stadium in stadiums
         ]
-        self.fields["time_slot"].choices = [(1, 1), (2, 2), (3, 3), (4, 4)]
+        self.fields["time_slot"].choices = [
+            (1, "1 and 2"),
+            (2, "2 and 3"),
+            (3, "3 and 4"),
+        ]
         juries = manager.get_juries()
         self.fields["jury"].choices = [
             (jury[0], f"{jury[1]} {jury[2]}") for jury in juries
@@ -122,7 +126,16 @@ class SessionForm(forms.Form):
 
 
 class DeleteSessionForm(forms.Form):
-    session_id = forms.IntegerField(label="Session ID", required=True)
+    session_id = forms.ChoiceField(
+        label="Session ID", required=True, widget=forms.RadioSelect
+    )
+
+    def __init__(self, *args, **kwargs):
+        sessions = kwargs.pop("sessions")
+        super().__init__(*args, **kwargs)
+        self.fields["session_id"].choices = [
+            (session[0], session[0]) for session in sessions
+        ]
 
 
 class SessionSquadForm(forms.Form):
@@ -138,33 +151,59 @@ class SessionSquadForm(forms.Form):
 
 class AddSquadForm(forms.Form):
     players = forms.MultipleChoiceField(
-        label="Players",
-        widget=forms.CheckboxSelectMultiple,
-        required=True,
+        label="Players", widget=forms.CheckboxSelectMultiple
     )
 
     def __init__(self, *args, **kwargs):
+        players = kwargs.pop("players")
         super().__init__(*args, **kwargs)
-        self.fields["players"].choices = kwargs["players"]
+        self.fields["players"].choices = [
+            (
+                player[0],
+                f"{player[1]} {player[2]}",
+            )
+            for player in players
+        ]
 
     def clean(self):
         cleaned_data = super().clean()
         players = cleaned_data.get("players")
-
         if not players:
-            raise forms.ValidationError("Please fill all fields.")
-
-        if len(players) != 6:
-            raise forms.ValidationError("Please select 6 players.")
-
+            raise forms.ValidationError("Please select at least one player.")
+        elif len(players) != 6:
+            raise forms.ValidationError("A squad must have 6 players.")
         return cleaned_data
 
+
+class AddSquadPositionForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        players = kwargs.pop("players")
+        super().__init__(*args, **kwargs)
+        manager = MySQLManager()
+        positions = manager.get_positions()
+        for player in players:
+            self.fields[f"position_{player[0]}"] = forms.ChoiceField(
+                label=player[1],
+                choices=[(position[0], position[1]) for position in positions],
+                widget=forms.Select,
+            )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        for key, value in cleaned_data.items():
+            if not value:
+                raise forms.ValidationError("Please select a position for each player.")
+        return cleaned_data
+
+
 class RateMatchForm(forms.Form):
-    matches = forms.ChoiceField(label = "matches (session_ID, time_slot, date)", widget=forms.RadioSelect)
+    matches = forms.ChoiceField(
+        label="matches (session_ID, time_slot, date)", widget=forms.RadioSelect
+    )
     rating = forms.DecimalField(label="New Rating", required=True)
 
     def __init__(self, *args, **kwargs):
-        username = kwargs.pop('username')
+        username = kwargs.pop("username")
         super().__init__(*args, **kwargs)
         manager = MySQLManager()
         matches = manager.get_rating_matches(username)

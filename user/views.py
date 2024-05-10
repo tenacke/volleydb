@@ -17,7 +17,14 @@ def index(request):
                 request.session["type"] = controller.type
                 return redirect("home")
             else:
-                return render(request, "index.html", {"form": form, "error_message":"Wrong username and/or password. Please try again."})
+                return render(
+                    request,
+                    "index.html",
+                    {
+                        "form": form,
+                        "error_message": "Wrong username and/or password. Please try again.",
+                    },
+                )
     else:
         form = UserForm()
 
@@ -246,7 +253,18 @@ def add_match_session(request):
             jury = form.cleaned_data["jury"]
 
             try:
-                manager.add_match_session(stadium, date, time_slot, jury)
+                team = manager.get_team_by_coach_username(
+                    request.session["username"], date
+                )
+                print(date, team)
+                if team is None:
+                    error_message = "You have no team for this date."
+                    return render(
+                        request,
+                        "add_match_session.html",
+                        {"form": form, "error_message": error_message},
+                    )
+                manager.add_match_session(stadium, date, time_slot, jury, team[0])
             except Exception as e:
                 error_message = "Error: {}".format(e)
                 return render(
@@ -264,10 +282,13 @@ def add_match_session(request):
 
 def delete_match_session(request):
     manager = MySQLManager()
+    sessions = manager.get_sessions_by_coach_username(
+        request.session["username"], False
+    )
     if request.method == "POST":
-        form = DeleteSessionForm(request.POST)
+        form = DeleteSessionForm(request.POST, sessions=sessions)
         if form.is_valid():
-            session_id = form.cleaned_data
+            session_id = form.cleaned_data["session_id"]
             try:
                 manager.delete_match_session(session_id)
             except Exception as e:
@@ -280,7 +301,7 @@ def delete_match_session(request):
 
             return redirect("home")
     else:
-        form = SessionForm()
+        form = DeleteSessionForm(sessions=sessions)
 
     return render(request, "delete_match_session.html", {"form": form})
 
@@ -296,7 +317,7 @@ def list_stadiums(request):
 
 def add_squad(request):
     manager = MySQLManager()
-    sessions = manager.get_sessions_by_coach_username(request.session["username"])
+    sessions = manager.get_sessions_by_coach_username(request.session["username"], True)
     if not sessions:
         error_message = "You have no available sessions."
         return render(request, "add_squad.html", {"error_message": error_message})
@@ -307,26 +328,60 @@ def add_squad(request):
         )
         if form.is_valid():
             session_id = form.cleaned_data["session_id"]
-            try:
-                players = manager.get_players_by_session_id(session_id)
-                player_choices = [
-                    (player[0], f"{player[1]} {player[2]}") for player in players
-                ]
-                form = AddSquadForm(players=player_choices)
+            request.session["session_id"] = session_id
+            return redirect("add_squad_player")
+    else:
+        form = SessionSquadForm(sessions=sessions)
 
+    return render(request, "add_squad.html", {"form": form})
+
+
+def add_squad_player(request):
+    manager = MySQLManager()
+    session_id = request.session["session_id"]
+    players = manager.get_players_by_session_id(session_id)
+    if request.method == "POST":
+        form = AddSquadForm(request.POST, players=players)
+        if form.is_valid():
+            selected_players = form.cleaned_data["players"]
+            request.session["selected_players"] = [
+                (player[0], f"{player[1]} {player[2]}")
+                for player in players
+                if player[0] in selected_players
+            ]
+            return redirect("add_squad_position")
+    else:
+        form = AddSquadForm(players=players)
+
+    return render(request, "add_squad_player.html", {"form": form})
+
+
+def add_squad_position(request):
+    selected_players = request.session["selected_players"]
+    if request.method == "POST":
+        form = AddSquadPositionForm(request.POST, players=selected_players)
+        if form.is_valid():
+            positions = []
+            for player in selected_players:
+                position = form.cleaned_data[f"position_{player[0]}"]
+                positions.append((player[0], position))
+            manager = MySQLManager()
+            try:
+                manager.add_squad(request.session["session_id"], positions)
             except Exception as e:
                 error_message = "Error: {}".format(e)
+                manager.delete_squad(request.session["session_id"])
                 return render(
                     request,
-                    "add_squad.html",
+                    "add_squad_position.html",
                     {"form": form, "error_message": error_message},
                 )
 
             return redirect("home")
     else:
-        form = SessionSquadForm(sessions=sessions)
+        form = AddSquadPositionForm(players=selected_players)
 
-    return render(request, "add_squad.html", {"form": form})
+    return render(request, "add_squad_position.html", {"form": form})
 
 
 def rate_match(request):
@@ -336,14 +391,17 @@ def rate_match(request):
     if len(matches) == 0:
         error_message = "No matches for you to rate"
         return render(
-        request,
-        "home.html",
-        {"type": request.session["type"], "username": request.session["username"], "error_message": error_message})
-
-
+            request,
+            "home.html",
+            {
+                "type": request.session["type"],
+                "username": request.session["username"],
+                "error_message": error_message,
+            },
+        )
 
     if request.method == "POST":
-        form = RateMatchForm(request.POST, username = request.session["username"])
+        form = RateMatchForm(request.POST, username=request.session["username"])
         if form.is_valid():
             selected_match = form.cleaned_data["matches"]
             rating = form.cleaned_data["rating"]
@@ -371,14 +429,15 @@ def rate_match(request):
 
             return redirect("home")
     else:
-        form = RateMatchForm(username = request.session["username"])
+        form = RateMatchForm(username=request.session["username"])
 
     return render(
         request,
         "rate_match.html",
         {"form": form, "match_choices": match_choices},
     )
-    
+
+
 def player(request):
     manager = MySQLManager()
     played_with = []
@@ -397,5 +456,3 @@ def player(request):
         "player.html",
         {"players": played_with, "height": height},
     )
-
-
