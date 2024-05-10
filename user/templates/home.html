@@ -6,6 +6,9 @@
     <title>VolleyDB</title>
 </head>
 <body>
+    {% if error_message %}
+    <p>{{ error_message }}</p>
+    {% endif %}
 
     <h1>Hello {{ type }}</h1>
     
@@ -22,6 +25,7 @@
     {% if type == "jury" %}
     <ul>
         <li><a href="http://127.0.0.1:8000/jury_ratings">Your Rating Details</a></li>
+        <li><a href="http://127.0.0.1:8000/rate_match">Rate Matches</a></li>
     </ul>
     {% endif %}
 
@@ -33,5 +37,13 @@
             <li><a href="/list_stadiums">List Stadiums</a></li>
         </ul>
     {% endif %} 
+
+    {% if type == "player" %}
+    <ul>
+        <li><a href="/player">View Player Info</a></li>
+    </ul>
+{% endif %} 
+<br><br>
+<button style = "background-color:violet"><a href="/">Log Out</a></button>
 </body>
 </html>

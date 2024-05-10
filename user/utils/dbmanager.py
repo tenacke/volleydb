@@ -1,4 +1,5 @@
 from mysql.connector import connect
+from datetime import datetime
 
 
 class MySQLManager:
@@ -174,7 +175,6 @@ class MySQLManager:
             "SELECT user.username, user.name, user.surname FROM jury inner join user on jury.username = user.username"
         )
         juries = self.cursor.fetchall()
-        print(juries)
         self.cursor.reset()
         return juries
 
@@ -189,12 +189,73 @@ class MySQLManager:
 
     def get_sessions_by_coach_username(self, coach_username):
         self.cursor.execute(
-            "SELECT session_id FROM matchsession inner join team on matchsession.team_id = team.team_id where session_id not in (select session_id from sessionsquads) and team.coach_username = %s;",
+            """SELECT session_id FROM matchsession where session_id not in (select session_id from sessionsquad) 
+            inner join team on matchsession.team_id = team.team_id WHERE team.coach_username = %s;""",
             (coach_username,),
         )
 
     def get_players_by_session_id(self, session_id):
         pass
+
+    def get_rating_matches(self, username):
+        current_date = datetime.now().date()
+        sql_query = """SELECT * FROM matchsession 
+        WHERE rating IS NULL AND assigned_jury_username = %s AND date < str_to_date(%s, "%Y-%m-%d")"""
+        self.cursor.execute(sql_query, (username, current_date))
+        matches = self.cursor.fetchall()
+        self.cursor.reset()
+        return matches
+
+    def rate_match(self, id, rating):
+        try:
+            self.cursor.execute(
+                "UPDATE matchsession SET rating = %s WHERE session_id = %s;",
+                (rating, id),
+            )
+            self.connection.commit()
+        except Exception as e:
+            self.connection.rollback()
+            raise
+        finally:
+            self.cursor.reset()
+
+    def players(self, username):
+        self.cursor.execute(
+            """SELECT DISTINCT name, surname 
+            FROM sessionsquads AS V1 
+            INNER JOIN sessionsquads AS V2 ON V1.session_ID = V2.session_ID 
+            INNER JOIN user ON V2.played_player_username = user.username 
+            WHERE V1.played_player_username = %s AND V2.played_player_username != %s;""",
+            (username, username),
+        )
+        players = self.cursor.fetchall()
+        self.cursor.reset()
+        return players
+
+    def players_height(self, username):
+        self.cursor.execute(
+            """SELECT AVG(height) FROM
+            (SELECT MAX(count) as max_count
+            FROM (
+            SELECT V2.played_player_username, COUNT(V2.played_player_username) AS count
+            FROM sessionsquads AS V1 
+            INNER JOIN sessionsquads AS V2 ON V1.session_ID = V2.session_ID 
+            INNER JOIN user ON V2.played_player_username = user.username
+            WHERE V1.played_player_username = %s AND V2.played_player_username != %s
+            GROUP BY V2.played_player_username) AS all_counts) AS max_count
+            INNER JOIN (SELECT V2.played_player_username, COUNT(V2.played_player_username) AS count
+            FROM sessionsquads AS V1 
+            INNER JOIN sessionsquads AS V2 ON V1.session_ID = V2.session_ID 
+            INNER JOIN user ON V2.played_player_username = user.username
+            WHERE V1.played_player_username = %s AND V2.played_player_username != %s
+            GROUP BY V2.played_player_username) AS all_counts
+            ON max_count = count
+            INNER JOIN player ON played_player_username = username;""",
+            (username, username, username, username),
+        )
+        height = self.cursor.fetchall()
+        self.cursor.reset()
+        return height[0][0]
 
 
 if __name__ == "__main__":

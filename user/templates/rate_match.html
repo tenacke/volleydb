@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add a Player</title>
+    <title>Rate Match</title>
 </head>
 <body>
     {% if error_message %}
     <p>{{ error_message }}</p>
     {% endif %}
 
-    <h1>Add a Player</h1>
+    <h1>Rate Match</h1>
 
-    <form action="/add_player" method="post">
+    <form action="/rate_match" method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <br>
@@ -22,6 +22,5 @@
     <button style = "background-color:aquamarine"><a href="/home">Home Page</a></button>
     <br><br>
     <button style = "background-color:violet"><a href="/">Log Out</a></button>
-
 </body>
 </html>
