@@ -189,7 +189,7 @@ class MySQLManager:
 
     def get_sessions_by_coach_username(self, coach_username):
         self.cursor.execute(
-            "SELECT session_id FROM matchsession where session_id not in (select session_id from sessionsquad) inner join team on matchsession.team_id = team.team_id WHERE team.coach_username = %s;",
+            "SELECT session_id FROM matchsession inner join team on matchsession.team_id = team.team_id where session_id not in (select session_id from sessionsquads) and team.coach_username = %s;",
             (coach_username,),
         )
 

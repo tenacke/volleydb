@@ -129,9 +129,8 @@ class SessionSquadForm(forms.Form):
     session_id = forms.ChoiceField(label="Session ID", widget=forms.Select)
 
     def __init__(self, *args, **kwargs):
+        sessions = kwargs.pop("sessions")
         super().__init__(*args, **kwargs)
-        manager = MySQLManager()
-        sessions = manager.get_sessions_by_coach_username(kwargs["coach_username"])
         self.fields["session_id"].choices = [
             (session[0], session[0]) for session in sessions
         ]

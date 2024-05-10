@@ -294,9 +294,14 @@ def list_stadiums(request):
 
 def add_squad(request):
     manager = MySQLManager()
+    sessions = manager.get_sessions_by_coach_username(request.session["username"])
+    if not sessions:
+        error_message = "You have no available sessions."
+        return render(request, "add_squad.html", {"error_message": error_message})
     if request.method == "POST":
         form = SessionSquadForm(
-            request.POST, coach_username=request.session["username"]
+            request.POST,
+            sessions=sessions,
         )
         if form.is_valid():
             session_id = form.cleaned_data["session_id"]
@@ -317,6 +322,6 @@ def add_squad(request):
 
             return redirect("home")
     else:
-        form = SessionSquadForm(coach_username=request.session["username"])
+        form = SessionSquadForm(sessions=sessions)
 
     return render(request, "add_squad.html", {"form": form})
