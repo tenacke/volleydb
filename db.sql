@@ -390,9 +390,12 @@ END; $$
 CREATE TRIGGER check_position BEFORE INSERT ON SessionSquads
 FOR EACH ROW
 BEGIN
+	DECLARE potential_error_message VARCHAR(100);
+    SET potential_error_message = CONCAT('Player ', NEW.played_player_username, ' does not play in this position');
+
     IF NOT EXISTS (SELECT * FROM PlayerPositions WHERE username = NEW.played_player_username AND position = NEW.position_id) THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Player' + NEW.played_player_username + 'does not play in this position';
+        SET MESSAGE_TEXT = potential_error_message;
     END IF;
 END; $$
 DELIMITER ;

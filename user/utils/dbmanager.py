@@ -7,7 +7,7 @@ class MySQLManager:
         self.connection = connect(
             host="localhost",
             port=3306,
-            database="volleydb",
+            database="volleydb"
         )
         self.cursor = self.connection.cursor()
         self.session_count = 0
@@ -258,9 +258,9 @@ class MySQLManager:
     def get_players_by_session_id(self, session_id):
         query = """SELECT DISTINCT user.username, user.name, user.surname
         FROM user inner join player on user.username = player.username
-        inner join (select team from playerteams 
+        inner join (select * from playerteams 
         inner join (select team_id from matchsession where session_id = %s) as session 
-        on playerteams.team = session.team_id) as team"""
+        on playerteams.team = session.team_id) as team on team.username = user.username"""
         self.cursor.execute(query, (session_id,))
         players = self.cursor.fetchall()
         self.cursor.reset()

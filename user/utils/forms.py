@@ -4,7 +4,7 @@ from .dbmanager import MySQLManager
 
 class UserForm(forms.Form):
     username = forms.CharField(label="Username", max_length=100)
-    password = forms.CharField(label="Password", max_length=100)
+    password = forms.CharField(label="Password", max_length=100, required = False)
 
 
 class CoachForm(forms.Form):
@@ -183,7 +183,7 @@ class AddSquadPositionForm(forms.Form):
         positions = manager.get_positions()
         for player in players:
             self.fields[f"position_{player[0]}"] = forms.ChoiceField(
-                label=player[1],
+                label=f"{player[1]}  ({player[0]})",
                 choices=[(position[0], position[1]) for position in positions],
                 widget=forms.Select,
             )
