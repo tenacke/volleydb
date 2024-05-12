@@ -106,8 +106,6 @@ CREATE TABLE MatchSession (
     stadium_id INT NOT NULL,
     assigned_jury_username CHAR(20) NOT NULL,
     PRIMARY KEY (session_ID),
-    UNIQUE (session_ID, assigned_jury_username),
-    UNIQUE (team_id, `date`, time_slot, stadium_id),
     FOREIGN KEY (stadium_id) REFERENCES Stadium(stadium_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
